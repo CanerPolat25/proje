@@ -1,0 +1,93 @@
+---
+title: "2004-2016 Yılları Arası Türkiye'de İthal Lüks Otomobil Satışları"
+output: html_document
+---
+
+```{r otomobillerin_verileri, include=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+```
+## VERİ
+2004-2016 yılları arasında lüks araçların satış rakamlarına ait  veriler derlenmiştir
+```{r}
+otomobillerin_verileri<-readxl::read_excel("OtomobilSatisRefined.xlsx")
+otomobillerin_verileri
+```
+Verinin Özeti
+```{r}
+summary(otomobillerin_verileri)
+```
+Üzerinde çalışılacak olan markaların verileri aşağıdaki gibidir.
+
+```{r}
+audi_markasının_verileri<- otomobillerin_verileri %>%
+filter(MARKA == "AUDI")
+audi_markasının_verileri
+```
+
+```{r}
+audi_markasının_verileri<- otomobillerin_verileri %>%
+filter(MARKA == "BMW")
+audi_markasının_verileri
+```
+```{r}
+audi_markasının_verileri<- otomobillerin_verileri %>%
+filter(MARKA == "MERCEDES-BENZ")
+audi_markasının_verileri
+```
+
+```{r}
+audi_markasının_verileri<- otomobillerin_verileri %>%
+filter(MARKA == "PORSCHE")
+audi_markasının_verileri
+```
+
+```{r}
+audi_markasının_verileri<- otomobillerin_verileri %>%
+filter(MARKA == "VOLKSWAGEN")
+audi_markasının_verileri
+```
+
+
+```{r}
+seçilen_markalar = otomobillerin_verileri %>% filter(MARKA == "AUDI" | MARKA == "BMW"  | MARKA == "MERCEDES-BENZ"|MARKA == "PORSCHE" | MARKA == "VOLKSWAGEN" )
+```
+
+Seçilen markalara ilişkin yıllara göre satış miktarında artış görülmektedir. Bunu aşağıdaki grafikten anlamak mümkündür.
+```{r}
+
+his_grafiği = seçilen_markalar %>%
+group_by (YIL) %>%
+summarise (satis = sum(o_TOPLAM)) %>%
+ungroup()
+
+ggplot(data = his_grafiği, aes(x=YIL, y = satis)) + geom_bar(stat = "identity")
+
+```
+
+## Seçilen Markaların Genel Satışlarına Göre Dağılımı
+
+Wolkswagen marka aracın diğer secilen araçlara kıyasla satış miktarının çok daha fazla olduğu söylenebilmektedir.
+```{r}
+seçilen_marka_verileri2 <- seçilen_markalar %>%
+select(MARKA,YIL,o_TOPLAM) %>%
+group_by(YIL,MARKA) %>%
+summarise(deger=sum(o_TOPLAM)) %>%
+ungroup()
+
+seçilen_marka_verileri2_grafiği <-ggplot(data=seçilen_marka_verileri2,aes(x=YIL,y=deger,fill=ordered(MARKA,levels=c("AUDI" , "BMW" ,"MERCEDES-BENZ", "PORSCHE" , "VOLKSWAGEN"  )))) + geom_bar(stat="identity",position="dodge") + labs(fill="")
+
+seçilen_marka_verileri2_grafiği
+```
+
+Seçilen markalar arasında açık bir farkla satış miktarı fazla olan Volkswagen veri setinden çıkartılarak  diğer seçilen otomobil markalarının analiz sonuçları aşağıda verilmiştir.
+
+```{r}
+
+seçilen_marka_verileri2_grafiği <-ggplot(data=seçilen_marka_verileri2 %>% filter(!(MARKA %in% c("VOLKSWAGEN"))) ,aes(x=YIL,y=deger,fill=ordered(MARKA,levels=c("AUDI" , "BMW" ,"MERCEDES-BENZ", "PORSCHE" , "VOLKSWAGEN"  )))) + geom_bar(stat="identity",position="dodge") + labs(fill="")
+
+seçilen_marka_verileri2_grafiği
+```
+
+Seçilen markalar arasında açık bir farkla satış miktarı fazla olan Volkswagen veri setinden çıkarıldıktan sonra pazarın  AUDI, BMW ve MERCEDES markaları tarafından paylaşıldığı görülmektedir. 
